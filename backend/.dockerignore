@@ -1,0 +1,6 @@
+# Files Docker should never send into the image build
+.venv
+.env
+.env.*
+**/__pycache__
+seeds/expected_answers.json

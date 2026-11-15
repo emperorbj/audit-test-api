@@ -1,0 +1,16 @@
+# ---- Secrets: never commit these ----
+.env
+.env.*
+!.env.example
+
+# ---- Python ----
+.venv/
+__pycache__/
+*.py[oc]
+
+# ---- Generated files ----
+backend/seeds/expected_answers.json
+*.zip
+
+# ---- OS / editor clutter ----
+.DS_Store

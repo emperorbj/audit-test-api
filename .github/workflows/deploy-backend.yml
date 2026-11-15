@@ -1,0 +1,62 @@
+# Deploys the backend to AWS Lambda.
+# Runs automatically when something in backend/ changes on the main branch,
+# or by hand from the GitHub "Actions" tab (the "Run workflow" button).
+
+name: Deploy backend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/deploy-backend.yml"
+  workflow_dispatch: # adds the "Run workflow" button
+
+# id-token: write lets GitHub prove to AWS "I am this repo" (OIDC). No AWS keys are stored.
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION }}   # set in GitHub: Settings -> Secrets and variables -> Actions -> Variables
+  ECR_REPOSITORY: audit-backend
+  LAMBDA_FUNCTION: audit-backend
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get the code
+        uses: actions/checkout@v4
+
+      - name: Log in to AWS (using the role, via OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Log in to ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push the image
+        working-directory: backend
+        run: |
+          IMAGE=${{ steps.ecr.outputs.registry }}/$ECR_REPOSITORY
+          # Two tags: the commit ID (to know exactly what's deployed) and "latest"
+          docker build --platform linux/amd64 --provenance=false \
+            -t $IMAGE:${{ github.sha }} -t $IMAGE:latest .
+          docker push $IMAGE:${{ github.sha }}
+          docker push $IMAGE:latest
+          echo "IMAGE_URI=$IMAGE:${{ github.sha }}" >> $GITHUB_ENV
+
+      - name: Point Lambda at the new image
+        run: |
+          # The very first run happens before the Lambda function exists. Then we only push the image.
+          if aws lambda get-function --function-name $LAMBDA_FUNCTION > /dev/null 2>&1; then
+            aws lambda update-function-code --function-name $LAMBDA_FUNCTION --image-uri $IMAGE_URI
+            aws lambda wait function-updated --function-name $LAMBDA_FUNCTION
+            echo "Deployed $IMAGE_URI"
+          else
+            echo "Lambda function '$LAMBDA_FUNCTION' doesn't exist yet. Image pushed; create the function in the console."
+          fi
