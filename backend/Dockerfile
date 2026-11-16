@@ -19,9 +19,11 @@ RUN UV_COMPILE_BYTECODE=1 uv sync --frozen --no-dev --no-install-project
 # 2. Copy our code. Only app/: no .env, no seeds, no tests.
 COPY app ./app
 
+# The Lambda adapter waits until the app answers on PORT before sending requests.
+# (Its default check doesn't touch the database, so a DB problem shows up as a clear
+# error from /health instead of the whole app looking dead.)
 ENV PATH="/app/.venv/bin:$PATH" \
-    PORT=8000 \
-    AWS_LWA_READINESS_CHECK_PATH=/health
+    PORT=8000
 
 # Start the API (fastapi finds app/main.py through [tool.fastapi] in pyproject.toml).
 CMD ["fastapi", "run", "--port", "8000"]
