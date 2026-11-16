@@ -18,10 +18,12 @@ config = context.config
 # OUR CHANGE 1: take the database URL from our settings (.env), not alembic.ini.
 # We use the DIRECT Neon URL: migrations change table structure, and that
 # should not go through Neon's connection pooler.
+# (If no direct URL is set, fall back to the normal one.)
 # ("%" is doubled because Alembic's config file format treats "%" as special.)
+migration_url = settings.database_url_direct or settings.database_url
 config.set_main_option(
     "sqlalchemy.url",
-    to_async_url(settings.database_url_direct).replace("%", "%%"),
+    to_async_url(migration_url).replace("%", "%%"),
 )
 
 # Interpret the config file for Python logging.

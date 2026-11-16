@@ -229,12 +229,11 @@ Open the **Configuration** tab; a menu appears on the left.
 **General configuration** → **Edit** → Memory **`1024`** MB → Timeout **0 min 30 sec** → **Save**
 
 ### 7.2 Environment variables
-**Environment variables** → **Edit** → **Add environment variable**, three times:
+**Environment variables** → **Edit** → **Add environment variable**, twice:
 
 | Key (exactly) | Value |
 |---|---|
 | `DATABASE_URL` | your **pooled** Neon string |
-| `DATABASE_URL_DIRECT` | your **direct** Neon string |
 | `JWT_SECRET` | a **new** random secret (below) |
 
 New secret, run on your laptop and copy the output:
@@ -250,7 +249,9 @@ Copy the URL (like `https://abc123xyz.lambda-url.us-east-1.on.aws/`).
 > Auth type NONE means anyone can *reach* the API. Our code still requires login for everything
 > except `/health` and `/auth/login`.
 
-**✅ Check:** 3 environment variables, and a Function URL is shown.
+**✅ Check:** 2 environment variables, and a Function URL is shown.
+
+> The *direct* Neon string is **not** needed on Lambda. It's only for migrations, which you run from your laptop.
 
 ---
 

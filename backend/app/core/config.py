@@ -9,13 +9,15 @@ class Settings(BaseSettings):
     If a required one is missing, the app refuses to start with a clear error.
     """
 
-    database_url: str          # Neon pooled URL, used by the app
-    database_url_direct: str   # Neon direct URL, used by migrations
+    database_url: str                      # Neon pooled URL, used by the app
+    database_url_direct: str | None = None # Neon direct URL, only for migrations (laptop). Not needed on Lambda.
 
     jwt_secret: str                  # secret key that signs login tokens
     jwt_expire_minutes: int = 60     # how long a login token stays valid (has a default)
 
-    model_config = SettingsConfigDict(env_file=".env")
+    # hide_input_in_errors: if a setting is missing or wrong, the error message must NOT
+    # print the other values (they are secrets, and errors end up in logs).
+    model_config = SettingsConfigDict(env_file=".env", hide_input_in_errors=True)
 
 
 def to_async_url(url: str) -> str:
