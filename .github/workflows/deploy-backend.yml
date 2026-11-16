@@ -12,9 +12,7 @@ on:
       - ".github/workflows/deploy-backend.yml"
   workflow_dispatch: # adds the "Run workflow" button
 
-# id-token: write lets GitHub prove to AWS "I am this repo" (OIDC). No AWS keys are stored.
 permissions:
-  id-token: write
   contents: read
 
 env:
@@ -29,10 +27,11 @@ jobs:
       - name: Get the code
         uses: actions/checkout@v4
 
-      - name: Log in to AWS (using the role, via OIDC)
+      - name: Log in to AWS (with the github-deploy user's access key)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}         # GitHub secret
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }} # GitHub secret
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Log in to ECR
