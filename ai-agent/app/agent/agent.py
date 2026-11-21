@@ -2,19 +2,39 @@
 
 from datetime import datetime, timezone
 
-from deepagents import create_deep_agent
+from deepagents import (
+    GeneralPurposeSubagentProfile,
+    HarnessProfile,
+    create_deep_agent,
+    register_harness_profile,
+)
+from langchain_anthropic import ChatAnthropic
 from langchain_mcp_adapters.client import MultiServerMCPClient
-from langchain_openai import ChatOpenAI
 
+from app.agent.answer import AuditAnswer
 from app.agent.prompts import SYSTEM_PROMPT
 from app.core.config import settings
 
+# No subagents: one agent does all the work itself.
+# Deep Agents adds a "general-purpose" helper subagent (and a `task` tool) by default,
+# even when we pass none. This turns it off for Claude (Anthropic) models.
+register_harness_profile(
+    "anthropic",
+    HarnessProfile(general_purpose_subagent=GeneralPurposeSubagentProfile(enabled=False)),
+)
 
-def make_model() -> ChatOpenAI:
-    """The LLM that thinks and decides which tools to call."""
-    return ChatOpenAI(
-        model=settings.openai_model,
-        api_key=settings.openai_api_key,  # passed explicitly (see Lesson 8A)
+
+def make_model() -> ChatAnthropic:
+    """The agent's LLM (Claude): plans, searches with the tools, checks evidence, writes the answer."""
+    return ChatAnthropic(
+        model=settings.anthropic_model,
+        api_key=settings.anthropic_api_key,   # passed explicitly (see Lesson 8A)
+        max_tokens=16000,                     # max length of ONE reply (the default is too big unless streaming)
+        reasoning_effort="medium",            # how deeply Claude thinks before each step (low/medium/high/...)
+        # If Claude's safety filter ever declines a request, Anthropic automatically
+        # re-runs it on a suitable fallback model instead of failing.
+        betas=["server-side-fallback-2026-07-01"],
+        model_kwargs={"fallbacks": "default"},
     )
 
 
@@ -36,8 +56,10 @@ async def load_tools(user_token: str):
 async def build_agent(user_token: str):
     """Create an agent that works on behalf of the user who owns `user_token`."""
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")
+    tools = await load_tools(user_token)
     return create_deep_agent(
         model=make_model(),
-        tools=await load_tools(user_token),
+        tools=tools,
         system_prompt=SYSTEM_PROMPT.format(now=now),
+        response_format=AuditAnswer,              # the final answer MUST have this shape
     )

@@ -6,7 +6,14 @@ from app.core.config import settings
 
 
 class BackendError(Exception):
-    """The backend said no (or couldn't be reached). The message is safe to show the LLM."""
+    """The backend said no (or couldn't be reached). The message is safe to show the LLM.
+
+    status_code: the HTTP status (e.g. 404 = not found), or None if the backend wasn't reached.
+    """
+
+    def __init__(self, message: str, status_code: int | None = None):
+        super().__init__(message)
+        self.status_code = status_code
 
 
 async def get_from_backend(path: str, token: str, params: dict | None = None) -> dict:
@@ -35,4 +42,4 @@ async def get_from_backend(path: str, token: str, params: dict | None = None) ->
         detail = response.json().get("detail", response.text)
     except ValueError:
         detail = response.text
-    raise BackendError(f"Backend returned {response.status_code}: {detail}")
+    raise BackendError(f"Backend returned {response.status_code}: {detail}", status_code=response.status_code)

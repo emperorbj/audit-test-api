@@ -6,16 +6,12 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     """Each field is read from the environment variable with the same name, in capitals
-    (for example `groq_model` <- GROQ_MODEL). Missing required ones stop the app at startup.
+    (for example `backend_url` <- BACKEND_URL). Missing required ones stop the app at startup.
     """
 
-    # --- The orchestrator (main agent) runs on OpenAI ---
-    openai_api_key: SecretStr   # SecretStr: printing it shows ********** instead of the key
-    openai_model: str           # e.g. "gpt-4.1"
-
-    # --- The subagents run on Groq ---
-    groq_api_key: SecretStr
-    groq_model: str
+    # --- The agent runs on Claude ---
+    anthropic_api_key: SecretStr                # SecretStr: printing it shows ********** instead of the key
+    anthropic_model: str = "claude-opus-5-5"    # has a default; set ANTHROPIC_MODEL to change it
 
     # --- Where our tools send their requests ---
     backend_url: str            # the backend's base URL, without a trailing slash
