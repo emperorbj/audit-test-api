@@ -1,0 +1,48 @@
+/*
+ * Tailwind v4 mapping for supabase-theme.css (semantic subset of
+ * supabase/supabase packages/config/css/theme.css, Apache-2.0, modified:
+ * Radix scales, brand scales and legacy aliases removed).
+ * CANDIDATE (status: proposed). Only needed if the project uses Tailwind v4.
+ * Usage: @import "tailwindcss"; @import "./supabase-theme.css";
+ *        @import "./a11y-overrides.css"; @import "./tailwind-theme.css";
+ */
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-bright: var(--primary-bright);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-solid: var(--primary-solid);
+  --color-primary-solid-hover: var(--primary-solid-hover);
+  --color-primary-solid-foreground: var(--primary-solid-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-tertiary: var(--tertiary);
+  --color-tertiary-foreground: var(--tertiary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-field: var(--field);
+  --color-control-raised: var(--control-raised);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-text: var(--destructive-text);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-border-control-hover: var(--border-control-hover);
+  --color-border-destructive: var(--border-destructive);
+  --color-border-warning: var(--border-warning);
+  --color-border-info: var(--border-info);
+}

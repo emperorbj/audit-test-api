@@ -1,0 +1,227 @@
+/* The waiting animation. Colours: design-kit tokens only (they follow light/dark).
+   Rule used throughout: an element's NORMAL style is its finished, visible look.
+   The @keyframes start from hidden. So when animations are switched off
+   (prefers-reduced-motion, at the bottom), every scene still shows a complete still picture. */
+
+.agent-thinking {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 24px 16px;
+  text-align: center;
+}
+
+.agent-thinking__art {
+  width: 160px;
+  height: 120px;
+  animation: at-fade-in 0.4s ease;
+}
+
+.agent-thinking__art svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.agent-thinking__label {
+  margin: 4px 0 0;
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+.agent-thinking__time {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+  font-variant-numeric: tabular-nums; /* digits keep the same width: no wobble as time ticks */
+}
+
+/* Shapes that grow or pop scale around their own centre. */
+.agent-thinking svg * {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation-fill-mode: both; /* while waiting for a delay, show the first keyframe (hidden) */
+}
+
+/* ---- Shared shapes ---- */
+.at-line {
+  fill: none;
+  stroke: var(--primary);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.at-card {
+  fill: var(--card);
+  stroke: var(--input);
+  stroke-width: 1.5;
+}
+
+.at-text-line {
+  stroke: var(--muted-foreground);
+  stroke-width: 3;
+  stroke-linecap: round;
+  opacity: 0.45;
+}
+
+/* ---- Scene: search ---- */
+.at-row {
+  fill: var(--muted-foreground);
+  opacity: 0.3;
+  animation: at-row-hit 2.5s ease-in-out infinite;
+}
+
+.at-lens {
+  transform-box: view-box;
+  transform-origin: 0 0;
+  transform: translate(40px, 20px);
+  animation: at-lens-move 2.5s ease-in-out infinite;
+}
+
+/* ---- Scene: approvals ---- */
+.at-link {
+  fill: none;
+  stroke: var(--primary);
+  stroke-width: 2.5;
+  stroke-dasharray: 44;
+  stroke-dashoffset: 0;
+  animation: at-link-draw 3s ease-in-out infinite;
+}
+
+.at-badge {
+  fill: var(--primary);
+  animation: at-badge-pop 3s ease-in-out infinite;
+}
+
+.at-check {
+  fill: none;
+  stroke: var(--primary-foreground); /* sits on the badge */
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 20;
+  stroke-dashoffset: 0;
+  animation: at-check-draw 3s ease-in-out infinite;
+}
+
+/* ---- Scene: citations ---- */
+.at-check--small {
+  stroke: var(--primary); /* sits on the card, not on a badge */
+  animation: at-check-draw-small 2.6s ease-in-out infinite;
+}
+
+/* ---- Scene: timeline ---- */
+.at-axis {
+  stroke: var(--input);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.at-tick {
+  stroke: var(--muted-foreground);
+  stroke-width: 2;
+  stroke-linecap: round;
+  opacity: 0.6;
+  animation: at-grow 2.6s ease-out infinite;
+}
+
+.at-dot {
+  fill: var(--primary);
+  animation: at-pop 2.6s ease-out infinite;
+}
+
+/* ---- Scene: evidence ---- */
+.at-ring {
+  fill: none;
+  stroke: var(--primary);
+  stroke-width: 1.5;
+  opacity: 0.3;
+  animation: at-ripple 2.4s ease-out infinite;
+}
+
+.at-core {
+  fill: var(--primary);
+  animation: at-breathe 1.6s ease-in-out infinite;
+}
+
+.at-dot--small {
+  animation-duration: 2.4s;
+}
+
+/* ---- Keyframes ---- */
+@keyframes at-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes at-row-hit {
+  0%, 30%, 100% { fill: var(--muted-foreground); opacity: 0.3; }
+  8%            { fill: var(--primary); opacity: 1; }
+}
+
+/* Visits the rows one by one, zig-zagging (each row lights up as the lens arrives). */
+@keyframes at-lens-move {
+  0%, 100% { transform: translate(40px, 20px); }
+  20%      { transform: translate(112px, 39px); }
+  40%      { transform: translate(46px, 58px); }
+  60%      { transform: translate(116px, 77px); }
+  80%      { transform: translate(52px, 96px); }
+}
+
+@keyframes at-link-draw {
+  0%       { stroke-dashoffset: 44; }
+  35%, 85% { stroke-dashoffset: 0; opacity: 1; }
+  100%     { stroke-dashoffset: 0; opacity: 0; }
+}
+
+@keyframes at-badge-pop {
+  0%, 35%  { transform: scale(0); }
+  45%      { transform: scale(1.15); }
+  52%, 85% { transform: scale(1); opacity: 1; }
+  100%     { transform: scale(1); opacity: 0; }
+}
+
+@keyframes at-check-draw {
+  0%, 48%  { stroke-dashoffset: 20; }
+  65%, 85% { stroke-dashoffset: 0; opacity: 1; }
+  100%     { stroke-dashoffset: 0; opacity: 0; }
+}
+
+@keyframes at-check-draw-small {
+  0%       { stroke-dashoffset: 20; }
+  20%, 85% { stroke-dashoffset: 0; opacity: 1; }
+  100%     { stroke-dashoffset: 0; opacity: 0; }
+}
+
+@keyframes at-pop {
+  0%       { transform: scale(0); }
+  12%      { transform: scale(1.3); }
+  20%, 85% { transform: scale(1); opacity: 1; }
+  100%     { transform: scale(1); opacity: 0; }
+}
+
+@keyframes at-grow {
+  0%, 10%  { transform: scaleY(0); }
+  25%, 85% { transform: scaleY(1); }
+  100%     { transform: scaleY(1); opacity: 0; }
+}
+
+@keyframes at-ripple {
+  0%   { transform: scale(0.15); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 0; }
+}
+
+@keyframes at-breathe {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.25); }
+}
+
+/* People who ask their system for less motion get still pictures (WCAG 2.3.3).
+   The scene and its label still change every few seconds, without movement. */
+@media (prefers-reduced-motion: reduce) {
+  .agent-thinking,
+  .agent-thinking * {
+    animation: none !important;
+  }
+}

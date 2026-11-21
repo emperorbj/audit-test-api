@@ -1,0 +1,173 @@
+/* Shared UI pieces: buttons, fields, dialogs, toasts, tables, chips, notices.
+   Colours: design-kit semantic tokens ONLY (they switch with .light / .dark). */
+
+/* ---------- Text helpers ---------- */
+.muted { color: var(--muted-foreground); }
+.small { font-size: 0.875rem; }
+.nowrap { white-space: nowrap; }
+.stack { display: flex; flex-direction: column; gap: 16px; }
+.spacer { flex: 1; }
+code { font-family: var(--mono); font-size: 0.9em; }
+
+/* ---------- Buttons ---------- */
+.btn {
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.btn--md { padding: 8px 16px; }
+.btn--sm { padding: 4px 10px; font-size: 0.875rem; }
+.btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.btn--primary {
+  background: var(--primary-solid); color: var(--primary-solid-foreground);
+  box-shadow: 0 1px 2px oklch(0 0 0 / 12%), 0 4px 12px var(--tint-primary-strong);
+}
+.btn--primary:hover:not(:disabled) { background: var(--primary-solid-hover); }
+.btn--secondary { background: var(--control); color: var(--foreground); border-color: var(--input); }
+.btn--secondary:hover:not(:disabled) { background: var(--accent); }
+.btn--ghost { background: transparent; color: var(--foreground); }
+.btn--ghost:hover:not(:disabled) { background: var(--accent); }
+.btn--danger { background: var(--destructive); color: var(--destructive-foreground); }
+.btn--danger:hover:not(:disabled) { background: var(--destructive-hover); }
+
+/* ---------- Form fields (design kit: form-field) ---------- */
+.field {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 12px;
+  border: 1px solid var(--input);
+  border-radius: var(--radius);
+  background: var(--field);
+  color: var(--foreground);
+  font: inherit;
+}
+.field:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; border-color: var(--primary); box-shadow: 0 0 0 4px var(--tint-primary); }
+.field[aria-invalid='true'] { border-color: var(--destructive-text); }
+.field:disabled { opacity: 0.6; }
+
+.form-field { display: flex; flex-direction: column; gap: 6px; }
+.form-field__label { font-weight: 500; font-size: 0.9rem; }
+.form-field__required { color: var(--destructive-text); }
+.form-field__hint { margin: 0; font-size: 0.85rem; color: var(--muted-foreground); }
+.form-field__error, .form-error { margin: 0; font-size: 0.875rem; color: var(--destructive-text); }
+
+/* ---------- Dialog (design kit: dialog-shell, centre) ---------- */
+.dialog {
+  width: min(520px, calc(100vw - 32px));
+  max-height: calc(100vh - 64px);
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--popover);
+  box-shadow: var(--shadow-lg);
+  color: var(--popover-foreground);
+}
+.dialog--wide { width: min(760px, calc(100vw - 32px)); }
+.dialog::backdrop { background: oklch(0 0 0 / 45%); backdrop-filter: blur(3px); }
+.dialog[open] { animation: dialog-in 140ms ease-out; }
+@keyframes dialog-in {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+/* The reduced-motion variant the kit is missing: no zoom, just appear. */
+@media (prefers-reduced-motion: reduce) {
+  .dialog[open] { animation: none; }
+}
+.dialog__panel { padding: 20px 24px; }
+.dialog__header { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.dialog__header h2 { margin: 0; font-size: 1.15rem; word-break: break-all; }
+.dialog__close {
+  border: 0; background: transparent; color: var(--muted-foreground);
+  font-size: 1.5rem; line-height: 1; cursor: pointer; border-radius: 6px; padding: 2px 8px;
+}
+.dialog__close:hover { background: var(--accent); color: var(--foreground); }
+.dialog__description { margin: 4px 0 0; color: var(--muted-foreground); }
+.dialog__body { margin-top: 16px; }
+.dialog__footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 24px; }
+
+/* ---------- Toasts (design kit: global-toasts) ---------- */
+.toaster {
+  position: fixed; right: 16px; bottom: 16px; z-index: 50;
+  display: flex; flex-direction: column; gap: 8px; max-width: min(420px, calc(100vw - 32px));
+}
+.toast {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 12px 14px; border-radius: var(--radius);
+  background: var(--popover); color: var(--popover-foreground);
+  border: 1px solid var(--border); box-shadow: 0 8px 24px oklch(0 0 0 / 20%);
+}
+.toast p { margin: 0; flex: 1; }
+.toast--success { border-color: var(--border-primary-bright); }
+.toast--success > span { color: var(--primary); font-weight: 700; }
+.toast--error { border-color: var(--border-destructive); }
+.toast--error > span { color: var(--destructive-text); font-weight: 700; }
+.toast__close { border: 0; background: transparent; color: var(--muted-foreground); cursor: pointer; font-size: 1.1rem; }
+
+/* ---------- Tables (design kit: data-table) ---------- */
+.data-table { display: flex; flex-direction: column; gap: 12px; }
+.data-table__search { max-width: 320px; }
+.data-table__scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: 14px; background: var(--card); box-shadow: var(--shadow-sm); }
+table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--muted-foreground); background: var(--muted); }
+tbody tr:hover { background: var(--accent); }
+tbody tr:last-child td { border-bottom: 0; }
+.data-table__sort {
+  border: 0; background: transparent; color: inherit; font: inherit; font-weight: 600;
+  cursor: pointer; padding: 0;
+}
+.data-table__empty { text-align: center; color: var(--muted-foreground); padding: 24px; }
+.data-table__pages { display: flex; align-items: center; gap: 12px; justify-content: flex-end; font-size: 0.875rem; }
+
+/* ---------- Chips (citations), notices, segmented control, disclosure ---------- */
+.chips { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  font-family: var(--mono); font-size: 0.8rem;
+  padding: 2px 9px; border-radius: 999px;
+  border: 1px solid var(--border-primary-bright); background: var(--tint-primary); color: var(--primary);
+  cursor: pointer;
+}
+.chip:hover { background: var(--accent); }
+
+.notice { margin: 0; padding: 10px 14px; border-radius: var(--radius); border: 1px solid; font-size: 0.9rem; }
+.notice p, .notice ul { margin: 0; }
+.notice ul { margin-top: 6px; padding-left: 20px; }
+.notice--ok { border-color: var(--border-primary-bright); background: var(--tint-primary); }
+.notice--ok > span { color: var(--primary); font-weight: 700; }
+/* Warning, not destructive red: a problem to check, not an accusation. */
+.notice--warning { border-color: var(--border-warning); background: color-mix(in oklch, var(--warning) 10%, transparent); }
+.notice--warning span[aria-hidden] { color: var(--warning); }
+
+.segmented { display: inline-flex; align-self: flex-start; border: 1px solid var(--input); border-radius: var(--radius); overflow: hidden; }
+.segmented button {
+  border: 0; background: transparent; color: var(--foreground); font: inherit; font-size: 0.875rem;
+  padding: 4px 12px; cursor: pointer;
+}
+.segmented button[aria-pressed='true'] { background: var(--primary-solid); color: var(--primary-solid-foreground); }
+
+.disclosure summary { cursor: pointer; font-weight: 500; font-size: 0.9rem; padding: 4px 0; }
+
+.code-block {
+  margin: 0; padding: 12px; overflow-x: auto;
+  background: var(--muted); border: 1px solid var(--border); border-radius: var(--radius);
+  font-family: var(--mono); font-size: 0.8rem; white-space: pre-wrap; word-break: break-word;
+}
+.code-block--small { padding: 8px 10px; }
+
+/* ---------- Keyboard: skip link ---------- */
+.skip-link {
+  position: absolute; left: 8px; top: -48px; z-index: 100;
+  padding: 8px 12px; border-radius: var(--radius);
+  background: var(--primary-solid); color: var(--primary-solid-foreground);
+}
+.skip-link:focus { top: 8px; }
