@@ -10,7 +10,9 @@ class Settings(BaseSettings):
     """
 
     # --- The agent runs on Claude ---
-    anthropic_api_key: SecretStr                # SecretStr: printing it shows ********** instead of the key
+    # Optional here because the MCP server (same code, its own Lambda) doesn't need it.
+    # The agent checks it's set when it starts a run (see make_model in agent.py).
+    anthropic_api_key: SecretStr | None = None  # SecretStr: printing it shows ********** instead of the key
     anthropic_model: str = "claude-opus-5-5"    # has a default; set ANTHROPIC_MODEL to change it
 
     # --- Where our tools send their requests ---
@@ -18,6 +20,12 @@ class Settings(BaseSettings):
 
     # --- Where the agent finds its tools (our MCP server). Has a default for local use. ---
     mcp_server_url: str = "http://127.0.0.1:8002/mcp"
+
+    # --- Where the MCP server itself listens ---
+    # Locally: 127.0.0.1 = only this laptop can reach it.
+    # On Lambda set MCP_HOST=0.0.0.0 so requests arriving through the Function URL get in.
+    mcp_host: str = "127.0.0.1"
+    mcp_port: int = 8002
 
     model_config = SettingsConfigDict(
         env_file=".env",

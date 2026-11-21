@@ -26,6 +26,8 @@ register_harness_profile(
 
 def make_model() -> ChatAnthropic:
     """The agent's LLM (Claude): plans, searches with the tools, checks evidence, writes the answer."""
+    if settings.anthropic_api_key is None:
+        raise RuntimeError("ANTHROPIC_API_KEY is not set.")
     return ChatAnthropic(
         model=settings.anthropic_model,
         api_key=settings.anthropic_api_key,   # passed explicitly (see Lesson 8A)

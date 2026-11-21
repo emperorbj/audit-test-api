@@ -13,12 +13,14 @@ Run it:   uv run python -m app.mcp_server.server     (listens on http://127.0.0.
 from mcp.server.fastmcp import Context, FastMCP
 from mcp.server.fastmcp.exceptions import ToolError
 
+from app.core.config import settings
 from app.tools.backend_client import BackendError, get_from_backend
 
 mcp = FastMCP(
     name="audit-tools",
     instructions="Read-only tools over the organization's audit logs. Times are UTC, ISO 8601.",
-    port=8002,              # the backend uses 8000 locally, so we take another port
+    host=settings.mcp_host,  # 127.0.0.1 locally, 0.0.0.0 on Lambda (see config.py)
+    port=settings.mcp_port,  # 8002 locally (the backend uses 8000)
     stateless_http=True,    # each request stands alone: no sessions to remember
     json_response=True,     # plain JSON answers (simpler than a stream for one-shot tools)
 )
