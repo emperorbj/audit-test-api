@@ -11,6 +11,12 @@ class InvestigationCreate(BaseModel):
     title: str = Field(min_length=1, max_length=200)
 
 
+class QuestionCreate(BaseModel):
+    """POST /investigations/{id}/messages body: a question for the agent."""
+
+    question: str = Field(min_length=1, max_length=4000)
+
+
 class InvestigationOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

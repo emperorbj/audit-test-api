@@ -15,6 +15,14 @@ class Settings(BaseSettings):
     jwt_secret: str                  # secret key that signs login tokens
     jwt_expire_minutes: int = 60     # how long a login token stays valid (has a default)
 
+    # Where the agent API lives (POST /ask). Locally: the agent running on port 8001.
+    agent_url: str = "http://127.0.0.1:8001"
+
+    # Which websites may call this API from a browser (CORS), separated by commas.
+    # Locally the Vite dev server. On Lambda add the Vercel address, e.g.
+    #   CORS_ORIGINS=https://audit-agent.vercel.app,http://localhost:5173
+    cors_origins: str = "http://localhost:5173"
+
     # hide_input_in_errors: if a setting is missing or wrong, the error message must NOT
     # print the other values (they are secrets, and errors end up in logs).
     model_config = SettingsConfigDict(env_file=".env", hide_input_in_errors=True)

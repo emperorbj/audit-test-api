@@ -74,6 +74,18 @@ async def get_current_user(
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
+async def get_user_token(
+    user: CurrentUser,  # runs the normal login check first
+    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_scheme)],
+) -> str:
+    """The caller's raw token, to pass on to the agent (it acts as this user)."""
+    return credentials.credentials
+
+
+# Short name for "the logged-in user's token".
+UserToken = Annotated[str, Depends(get_user_token)]
+
+
 def require_roles(*allowed_roles: str):
     """Build a dependency that only lets in users with one of `allowed_roles`.
 
