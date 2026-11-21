@@ -1,21 +1,12 @@
-// The frame around every page after login: top bar with navigation, user and log out.
+// The frame around every page after login: a floating "island" nav bar on top, the page below.
+//
+// Nav bar: logo on the left, page links in the middle (the current page sits on a raised pill),
+// and the user menu on the right (name, role, theme, log out).
 
 import { NavLink, Outlet } from 'react-router'
 import { useAuth, useCurrentUser } from '../../auth/AuthContext'
-import { Button } from '../ui/Button'
 import { Logo } from '../brand/Logo'
-
-const ROLE_NAMES = { org_admin: 'Org Admin', investigator: 'Investigator', viewer: 'Viewer' }
-
-// "Ada Mensah" -> "AM"
-function initials(name: string) {
-  return name.split(' ').filter(Boolean).slice(0, 2).map((part) => part[0].toUpperCase()).join('')
-}
-
-function toggleTheme() {
-  const html = document.documentElement
-  html.className = html.className === 'dark' ? 'light' : 'dark'
-}
+import { UserMenu } from './UserMenu'
 
 export function AppLayout() {
   const user = useCurrentUser()
@@ -25,23 +16,17 @@ export function AppLayout() {
   return (
     <div className="app">
       <a href="#main" className="skip-link">Skip to content</a>
-      <header className="topbar">
-        <span className="topbar__brand"><Logo /></span>
-        <nav aria-label="Main" className="topbar__nav">
-          <NavLink to="/investigations">Investigations</NavLink>
-          {isAdmin && <NavLink to="/users">Users</NavLink>}
-          {isAdmin && <NavLink to="/activity">Activity log</NavLink>}
+      <header className="island">
+        <span className="island__brand"><Logo /></span>
+
+        <nav aria-label="Main" className="island__nav">
+          <NavLink to="/investigations" className="island__link">Investigations</NavLink>
+          {isAdmin && <NavLink to="/users" className="island__link">Users</NavLink>}
+          {isAdmin && <NavLink to="/activity" className="island__link">Activity log</NavLink>}
         </nav>
-        <div className="topbar__user">
-          <span className="avatar" aria-hidden="true">{initials(user.name)}</span>
-          <span className="topbar__who">
-            <span>{user.name}</span>
-            <span className="muted small">{ROLE_NAMES[user.role]}</span>
-          </span>
-          <Button variant="ghost" size="sm" onClick={toggleTheme} aria-label="Switch light or dark theme">
-            ◐
-          </Button>
-          <Button variant="secondary" size="sm" onClick={logout}>Log out</Button>
+
+        <div className="island__end">
+          <UserMenu user={user} onLogout={logout} />
         </div>
       </header>
       <div id="main" className="app__main">

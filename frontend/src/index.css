@@ -5,12 +5,13 @@
 /* Base page styles. Use ONLY the semantic tokens (--background, --foreground, --primary, ...),
    never hex colours. <html> gets class="light" or "dark" in index.html. */
 :root {
-  --sans: system-ui, "Segoe UI", Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+  --sans: "Geist", system-ui, "Segoe UI", Roboto, sans-serif;
+  --mono: "Geist Mono", ui-monospace, Consolas, monospace;
   --radius: 8px;
 
   color-scheme: light dark;
-  font: 16px/1.5 var(--sans);
+  font: 14px/1.55 var(--sans);
+  letter-spacing: -0.005em;
   -webkit-font-smoothing: antialiased;
 }
 

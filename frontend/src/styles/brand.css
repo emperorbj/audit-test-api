@@ -16,19 +16,17 @@
   --shadow-lg: 0 20px 60px oklch(0 0 0 / 50%);
 }
 
-/* A soft glow at the top and a faint dot grid behind the whole app. */
+/* The app background: plain, with one very faint light at the top (no grids, no glows). */
 body {
   background:
-    radial-gradient(1100px 520px at 12% -10%, var(--tint-primary), transparent 70%),
-    radial-gradient(900px 480px at 100% 0%, var(--tint-info), transparent 70%),
-    radial-gradient(color-mix(in oklch, var(--foreground) 7%, transparent) 1px, transparent 1.2px) 0 0 / 22px 22px,
+    radial-gradient(1200px 400px at 50% -200px, color-mix(in oklch, var(--foreground) 5%, transparent), transparent 70%),
     var(--background);
   background-attachment: fixed;
 }
 
 /* ---------- Logo ---------- */
-.logo { display: inline-flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: -0.01em; }
-.logo__text { font-size: 1.05rem; }
+.logo { display: inline-flex; align-items: center; gap: 9px; font-weight: 600; letter-spacing: -0.02em; }
+.logo__text { font-size: 1rem; }
 .logo-mark__shield { fill: var(--primary-solid); }
 .logo-mark__lens, .logo-mark__handle {
   fill: none; stroke: var(--primary-solid-foreground); stroke-width: 2.4; stroke-linecap: round;
@@ -36,9 +34,9 @@ body {
 
 /* ---------- Avatar ---------- */
 .avatar {
-  display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary-solid), color-mix(in oklch, var(--primary-solid) 55%, var(--info)));
-  color: var(--primary-solid-foreground); font-weight: 600; font-size: 0.8rem; letter-spacing: 0.02em;
+  display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%;
+  background: color-mix(in oklch, var(--foreground) 10%, var(--card)); border: 1px solid var(--line-strong);
+  color: var(--foreground); font-weight: 600; font-size: 0.7rem; letter-spacing: 0.02em;
 }
 
 /* ---------- Login ---------- */
@@ -133,22 +131,15 @@ body {
   --glass-bg: color-mix(in oklch, var(--card) 52%, transparent);
 }
 
-.topbar,
-.sidebar,
-.chat__header,
-.chat__input,
-.answer,
-.example,
-.question-form,
-.data-table__scroll,
+/* Glass only where something floats over content: the island nav bar and the login card. */
+.island,
 .login__card {
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border-color: var(--glass-border);
-  box-shadow: var(--glass-highlight), var(--shadow-md);
 }
-.topbar, .sidebar, .chat__header, .chat__input { box-shadow: var(--glass-highlight); }
+.login__card { box-shadow: var(--glass-highlight), var(--shadow-lg); }
 
 /* Floating layers: a bit more solid, so text stays easy to read. */
 .dialog,
@@ -174,6 +165,5 @@ body {
 
 /* Browsers without backdrop-filter: fall back to solid panels (still readable). */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .topbar, .sidebar, .chat__header, .chat__input, .answer, .example,
-  .question-form, .data-table__scroll, .login__card, .dialog, .toast { background: var(--card); }
+  .island, .login__card, .dialog, .toast { background: var(--card); }
 }

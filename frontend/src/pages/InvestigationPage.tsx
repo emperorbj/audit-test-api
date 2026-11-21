@@ -53,8 +53,8 @@ export function InvestigationPage() {
   }
 
   function printReport() {
-    // Open every collapsed section so it's included in the PDF, then open the print dialog.
-    document.querySelectorAll('details').forEach((d) => { d.open = true })
+    // Prints what is on screen (open the Evidence / Steps tabs first to include them).
+    // The Markdown export always includes the evidence table and the tool-call log.
     window.print()
   }
 

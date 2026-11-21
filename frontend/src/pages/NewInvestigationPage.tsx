@@ -10,13 +10,19 @@ import { canAsk, useCurrentUser } from '../auth/AuthContext'
 import { AgentThinking } from '../components/agent-thinking/AgentThinking'
 import { useToast } from '../components/ui/Toaster'
 import { QuestionForm } from '../features/investigation/QuestionForm'
-import { LogoMark } from '../components/brand/Logo'
 
 // The example questions from the scope (US-01, US-02, US-03).
 const EXAMPLES = [
-  { tag: 'Records', question: 'Who deleted customer records in the last 7 days?' },
-  { tag: 'Logins', question: 'Show failed logins in the last 24 hours' },
-  { tag: 'Permissions', question: 'Did any admin change permissions without approval in the last 7 days?' },
+  { area: 'Customer records', question: 'Who deleted customer records in the last 7 days?' },
+  { area: 'Authentication', question: 'Show failed logins in the last 24 hours' },
+  { area: 'Permissions', question: 'Did any admin change permissions without approval in the last 7 days?' },
+]
+
+// What the three parts of every answer mean (scope FR-3).
+const ANSWER_PARTS = [
+  { kind: 'fact', name: 'Verified fact', text: 'Proven by audit events. Each one links to the original record.' },
+  { kind: 'inference', name: 'Inference', text: 'A likely conclusion the data does not prove. Treat it as a lead.' },
+  { kind: 'unresolved', name: 'Unresolved', text: 'What could not be checked, and why. Missing data is not wrongdoing.' },
 ]
 
 export function NewInvestigationPage() {
@@ -28,9 +34,10 @@ export function NewInvestigationPage() {
 
   if (!canAsk(user.role)) {
     return (
-      <div className="empty-state">
-        <h1>Investigations</h1>
-        <p className="muted">Pick an investigation on the left to read it. Viewers can read investigations but can't ask new questions.</p>
+      <div className="start">
+        <p className="start__eyebrow">Read-only access</p>
+        <h1 className="start__title">Pick an investigation to read</h1>
+        <p className="start__lead">Viewers can read every investigation and its evidence, but can't ask new questions.</p>
       </div>
     )
   }
@@ -65,21 +72,42 @@ export function NewInvestigationPage() {
   }
 
   return (
-    <div className="empty-state">
-      <span className="empty-state__icon" aria-hidden="true"><LogoMark size={34} /></span>
-      <h1>What do you want to investigate?</h1>
-      <p className="muted">
-        Ask about who did what in your audit logs. Every fact in the answer links to the original event.
+    <div className="start">
+      <p className="start__eyebrow">New investigation</p>
+      <h1 className="start__title">Ask about your audit logs</h1>
+      <p className="start__lead">
+        The agent searches the logs with read-only tools and answers with evidence you can check.
       </p>
-      <div className="examples" role="group" aria-label="Example questions">
-        {EXAMPLES.map((example) => (
-          <button key={example.question} type="button" className="example" onClick={() => ask(example.question)}>
-            <span className="example__tag">{example.tag}</span>
-            <span>{example.question}</span>
-          </button>
-        ))}
-      </div>
-      <QuestionForm onAsk={ask} busy={start.isPending} />
+
+      <QuestionForm onAsk={ask} busy={start.isPending} size="large"
+        placeholder="e.g. Who changed roles for the finance team this week?" />
+
+      <section className="start__section" aria-labelledby="suggested">
+        <h2 id="suggested" className="start__label">Suggested</h2>
+        <ul className="suggestions">
+          {EXAMPLES.map((example) => (
+            <li key={example.question}>
+              <button type="button" className="suggestion" onClick={() => ask(example.question)}>
+                <span className="suggestion__area">{example.area}</span>
+                <span className="suggestion__text">{example.question}</span>
+                <span className="suggestion__go" aria-hidden="true">→</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="start__section" aria-labelledby="how">
+        <h2 id="how" className="start__label">How answers are structured</h2>
+        <dl className="legend">
+          {ANSWER_PARTS.map((part) => (
+            <div key={part.kind} className="legend__item">
+              <dt><span className={`marker marker--${part.kind}`} aria-hidden="true" /> {part.name}</dt>
+              <dd>{part.text}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
     </div>
   )
 }

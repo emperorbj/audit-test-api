@@ -1,15 +1,15 @@
 // One answer from the agent: summary, then facts / inferences / unresolved, each claim with
-// its evidence (scope §6.1 C, FR-2, FR-3). Below: the evidence and the investigation trace.
+// its evidence (scope §6.1 C, FR-2, FR-3). Below: the evidence and the investigation steps.
 //
-// Colour rules from PROJECT-NOTES.md: the three kinds are told apart by an icon AND text,
+// Colour rules from PROJECT-NOTES.md: the three kinds are told apart by a marker AND text,
 // not only by colour, and nothing here uses "danger red" (missing data is not wrongdoing).
 
 import { useState } from 'react'
 import type { AgentAnswer, Claim, TraceStep } from '../../api/types'
 import { citedEventIds } from '../../lib/format'
+import { LogoMark } from '../../components/brand/Logo'
 import { EvidenceView } from './EvidenceView'
 import { TraceView } from './TraceView'
-import { LogoMark } from '../../components/brand/Logo'
 
 type Props = {
   answer: AgentAnswer
@@ -44,19 +44,26 @@ function ClaimList({ claims, onOpenEvent }: { claims: Claim[]; onOpenEvent: (id:
   )
 }
 
-function CitationCheck({ answer }: { answer: AgentAnswer }) {
+// The result of our code's citation check, as a small badge (and details if it failed).
+function CitationBadge({ answer }: { answer: AgentAnswer }) {
   const report = answer.citations
-  if (report.ok) {
-    return (
-      <p className="notice notice--ok">
-        <span aria-hidden="true">✓</span> All {report.checked_event_ids.length} cited events were found in the audit
-        data, and every fact has evidence.
-      </p>
-    )
-  }
+  return report.ok ? (
+    <span className="badge badge--ok">
+      <span aria-hidden="true">✓</span> {report.checked_event_ids.length} citations verified
+    </span>
+  ) : (
+    <span className="badge badge--warning">
+      <span aria-hidden="true">!</span> Citation check failed
+    </span>
+  )
+}
+
+function CitationProblems({ answer }: { answer: AgentAnswer }) {
+  const report = answer.citations
+  if (report.ok) return null
   return (
     <div className="notice notice--warning" role="note">
-      <p><span aria-hidden="true">⚠</span> <strong>Check this answer carefully.</strong> Our automatic citation check found problems:</p>
+      <p><strong>Check this answer carefully.</strong> Our automatic citation check found problems:</p>
       <ul>
         {report.missing_event_ids.length > 0 && (
           <li>Cited events that don't exist: {report.missing_event_ids.join(', ')}</li>
@@ -70,61 +77,59 @@ function CitationCheck({ answer }: { answer: AgentAnswer }) {
 }
 
 export function AgentAnswerView({ answer, trace, onOpenEvent }: Props) {
-  const [showEvidence, setShowEvidence] = useState(false)
+  const [panel, setPanel] = useState<'evidence' | 'steps' | null>(null)
   const eventIds = citedEventIds([...answer.verified_facts, ...answer.inferences])
+  const toggle = (name: 'evidence' | 'steps') => setPanel(panel === name ? null : name)
 
   return (
     <article className="answer" aria-label="Agent answer">
       <header className="answer__head">
-        <LogoMark size={22} /> Audit Agent
-        <span className="muted small">answered in {Math.round(answer.seconds)} s</span>
+        <span className="answer__who"><LogoMark size={18} /> Audit Agent</span>
+        <CitationBadge answer={answer} />
+        <span className="answer__time">{Math.round(answer.seconds)} s</span>
       </header>
-      <p className="answer__summary">{answer.summary}</p>
 
-      <CitationCheck answer={answer} />
+      <p className="answer__summary">{answer.summary}</p>
+      <CitationProblems answer={answer} />
 
       {answer.verified_facts.length > 0 && (
-        <section className="finding finding--fact">
-          <h3><span aria-hidden="true">✓</span> Verified facts</h3>
+        <section className="finding">
+          <h3><span className="marker marker--fact" aria-hidden="true" /> Verified facts</h3>
           <ClaimList claims={answer.verified_facts} onOpenEvent={onOpenEvent} />
         </section>
       )}
 
       {answer.inferences.length > 0 && (
-        <section className="finding finding--inference">
-          <h3><span aria-hidden="true">≈</span> Inferences <span className="muted small">(not proven)</span></h3>
+        <section className="finding">
+          <h3><span className="marker marker--inference" aria-hidden="true" /> Inferences <span className="finding__note">not proven</span></h3>
           <ClaimList claims={answer.inferences} onOpenEvent={onOpenEvent} />
         </section>
       )}
 
       {answer.unresolved.length > 0 && (
-        <section className="finding finding--unresolved">
-          <h3><span aria-hidden="true">?</span> Unresolved / not checked</h3>
+        <section className="finding">
+          <h3><span className="marker marker--unresolved" aria-hidden="true" /> Unresolved</h3>
           <ul className="claims">
             {answer.unresolved.map((item, i) => <li key={i}><p>{item}</p></li>)}
           </ul>
         </section>
       )}
 
-      <div className="answer__extras">
-        {eventIds.length > 0 && (
-          <div>
-            <button type="button" className="btn btn--secondary btn--sm" aria-expanded={showEvidence}
-              onClick={() => setShowEvidence(!showEvidence)}>
-              {showEvidence ? 'Hide evidence' : `Show evidence (${eventIds.length} events)`}
+      <footer className="answer__foot">
+        <div className="answer__tabs" role="group" aria-label="More about this answer">
+          {eventIds.length > 0 && (
+            <button type="button" className="tab" aria-expanded={panel === 'evidence'} onClick={() => toggle('evidence')}>
+              Evidence <span className="tab__count">{eventIds.length}</span>
             </button>
-            {/* Only fetch the events when the user opens the evidence. */}
-            {showEvidence && <EvidenceView eventIds={eventIds} onOpenEvent={onOpenEvent} />}
-          </div>
-        )}
-
-        <details className="disclosure">
-          <summary>
-            Investigation steps ({trace.length} tool call{trace.length === 1 ? '' : 's'} · {Math.round(answer.seconds)} s)
-          </summary>
-          <TraceView steps={trace} />
-        </details>
-      </div>
+          )}
+          <button type="button" className="tab" aria-expanded={panel === 'steps'} onClick={() => toggle('steps')}>
+            Investigation steps <span className="tab__count">{trace.length}</span>
+          </button>
+        </div>
+        {/* Evidence is only fetched when opened. */}
+        {panel === 'evidence' && <EvidenceView eventIds={eventIds} onOpenEvent={onOpenEvent} />}
+        {panel === 'steps' && <TraceView steps={trace} />}
+      </footer>
     </article>
   )
 }
