@@ -16,7 +16,7 @@ from scripts.try_backend_client import login
 
 DEFAULT_QUESTION = "Who deleted customer records yesterday?"
 
-MAX_STEPS = 60          # LangGraph stops the agent after this many steps
+MAX_STEPS = 100         # same limit as the agent API (app/main.py)
 MAX_SECONDS = 4 * 60    # we cancel the run after this long
 
 

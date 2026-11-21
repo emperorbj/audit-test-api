@@ -13,14 +13,16 @@ from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from langgraph.errors import GraphRecursionError
 from pydantic import BaseModel, Field
 
 from app.agent.agent import build_agent
 from app.agent.answer import AuditAnswer
 from app.agent.citations import CitationReport, check_citations
+from app.agent.trace import build_trace
 from app.tools.backend_client import BackendError, get_from_backend
 
-MAX_STEPS = 60          # LangGraph stops the agent after this many steps
+MAX_STEPS = 100         # LangGraph stops the agent after this many steps (multi-step questions need ~60+)
 MAX_SECONDS = 4 * 60    # we give up on a run after this long
 
 app = FastAPI(title="Audit Agent")
@@ -38,6 +40,7 @@ class AskRequest(BaseModel):
 class AskResponse(BaseModel):
     answer: AuditAnswer          # the agent's structured answer
     citations: CitationReport    # our code's check that every cited event really exists
+    trace: list[dict]            # the tools the agent called, in order (see trace.py)
     seconds: float               # how long the run took
 
 
@@ -87,6 +90,9 @@ async def ask(body: AskRequest, token: UserToken):
         )
     except asyncio.TimeoutError:
         raise HTTPException(status.HTTP_504_GATEWAY_TIMEOUT, "The agent took too long. Try a narrower question.")
+    except GraphRecursionError:
+        # The agent used all its steps without finishing (it kept calling tools).
+        raise HTTPException(status.HTTP_504_GATEWAY_TIMEOUT, "The agent needed too many steps. Try a narrower question.")
 
     answer = state.get("structured_response")
     if answer is None:
@@ -98,4 +104,9 @@ async def ask(body: AskRequest, token: UserToken):
     except BackendError as error:
         raise HTTPException(status.HTTP_502_BAD_GATEWAY, f"Could not check citations: {error}")
 
-    return AskResponse(answer=answer, citations=citations, seconds=round(time.monotonic() - started, 1))
+    return AskResponse(
+        answer=answer,
+        citations=citations,
+        trace=build_trace(state["messages"]),
+        seconds=round(time.monotonic() - started, 1),
+    )
